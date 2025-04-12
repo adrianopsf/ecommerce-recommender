@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Serviço da API
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=ecommerce_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - DEBUG=True
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+      - ./models:/app/models
+    networks:
+      - ecommerce-network
+
+  # Serviço do banco de dados
+  db:
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=ecommerce_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  # Serviço do dashboard
+  dashboard:
+    build: .
+    command: streamlit run src/dashboard/app.py
+    ports:
+      - "8501:8501"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=ecommerce_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+      - ./models:/app/models
+    networks:
+      - ecommerce-network
+
+# Volumes para persistência de dados
+volumes:
+  postgres_data:
+
+# Rede para comunicação entre serviços
+networks:
+  ecommerce-network:
+    driver: bridge 
