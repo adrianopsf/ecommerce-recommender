@@ -11,12 +11,14 @@ services:
       - DB_PORT=5432
       - DB_NAME=ecommerce_db
       - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DB_PASSWORD=${DOCKER_DB_PASSWORD}
+      - DOCKER_DB_PASSWORD=${DOCKER_DB_PASSWORD}
       - API_HOST=0.0.0.0
       - API_PORT=8000
       - DEBUG=True
     depends_on:
       - db
+      - db_init
     volumes:
       - ./src:/app/src
       - ./models:/app/models
@@ -31,16 +33,34 @@ services:
     environment:
       - POSTGRES_DB=ecommerce_db
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=${DOCKER_DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  # Serviço de inicialização do banco de dados
+  db_init:
+    build: .
+    command: sh /app/src/database/init_db.sh
+    environment:
+      - DOCKER_DB_PASSWORD=${DOCKER_DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=ecommerce_db
+      - DB_USER=postgres
+      - DB_PASSWORD=${DOCKER_DB_PASSWORD}
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
     networks:
       - ecommerce-network
 
   # Serviço do dashboard
   dashboard:
     build: .
-    command: streamlit run src/dashboard/app.py
+    command: python -m streamlit run src/dashboard/app.py --server.port=8501 --server.address=0.0.0.0
     ports:
       - "8501:8501"
     environment:
@@ -48,9 +68,11 @@ services:
       - DB_PORT=5432
       - DB_NAME=ecommerce_db
       - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DB_PASSWORD=${DOCKER_DB_PASSWORD}
+      - DOCKER_DB_PASSWORD=${DOCKER_DB_PASSWORD}
     depends_on:
       - db
+      - db_init
     volumes:
       - ./src:/app/src
       - ./models:/app/models

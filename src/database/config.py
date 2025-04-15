@@ -12,13 +12,23 @@ DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "ecommerce_db")
 DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+# Verifica se a senha está definida
+if not DB_PASSWORD:
+    raise ValueError("DB_PASSWORD não está definida no arquivo .env")
 
 # URL de conexão
 SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# Cria engine
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# Cria engine com configurações de pool
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_size=5,
+    max_overflow=10,
+    pool_timeout=30,
+    pool_recycle=1800
+)
 
 # Cria sessão
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

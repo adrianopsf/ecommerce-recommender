@@ -1,5 +1,5 @@
-from .config import engine, Base
-from .models import User, Product, Review, Purchase, PurchaseItem
+from src.database.config import engine, Base
+from src.database.models import Product, Review, User, Purchase, PurchaseItem
 import os
 from dotenv import load_dotenv
 
@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def init_db():
-    """Inicializa o banco de dados criando todas as tabelas"""
-    # Cria todas as tabelas
+    """Initialize the database by creating all tables."""
+    print("Creating database tables...")
     Base.metadata.create_all(bind=engine)
-    print("Banco de dados inicializado com sucesso!")
+    print("Database tables created successfully!")
 
 def seed_db():
     """Popula o banco de dados com dados iniciais para teste"""

@@ -13,14 +13,15 @@ Este projeto implementa um sistema de recomendação de produtos e análise de s
 ## 📋 Pré-requisitos
 
 - Python 3.9+
-- PostgreSQL
+- PostgreSQL 12+
 - Git
+- pip (gerenciador de pacotes Python)
 
 ## 🔧 Instalação
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/ecommerce-recommender.git
+git clone https://github.com/adrianopsf/ecommerce-recommender.git
 cd ecommerce-recommender
 ```
 
@@ -36,15 +37,70 @@ venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 ```
 
-4. Configure o arquivo .env:
+4. Configure o PostgreSQL:
+   - Instale o PostgreSQL se ainda não tiver: https://www.postgresql.org/download/
+   - Crie um banco de dados chamado `ecommerce_db`:
+     ```sql
+     CREATE DATABASE ecommerce_db;
+     ```
+   - Anote a senha do usuário postgres que você definiu durante a instalação
+
+5. Configure o arquivo .env:
 ```bash
 cp .env.example .env
-# Edite o arquivo .env com suas configurações
+```
+Edite o arquivo `.env` com suas configurações:
+```
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=ecommerce_db
+DB_USER=postgres
+DB_PASSWORD=sua_senha_aqui  # Substitua pela senha que você definiu
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+DEBUG=True
+
+# Model Configuration
+MODEL_PATH=./models
+DATA_PATH=./data
 ```
 
-5. Inicialize o banco de dados:
+6. Inicialize o banco de dados:
 ```bash
 python src/database/init_db.py
+```
+
+## 📊 Dados de Exemplo
+
+O projeto inclui dados de exemplo que podem ser usados para testar o sistema. Os dados estão disponíveis na pasta `data/` e incluem:
+
+1. Produtos:
+   - ID do produto
+   - Nome
+   - Descrição
+   - Categoria
+   - Preço
+   - Imagem
+
+2. Avaliações:
+   - ID do usuário
+   - ID do produto
+   - Nota (1-5)
+   - Comentário
+   - Data
+
+3. Usuários:
+   - ID do usuário
+   - Nome
+   - Email
+   - Histórico de compras
+
+Para carregar os dados de exemplo no banco de dados:
+```bash
+python src/database/load_sample_data.py
 ```
 
 ## 🏃‍♂️ Executando o Projeto
@@ -53,16 +109,20 @@ python src/database/init_db.py
 ```bash
 uvicorn src.api.main:app --reload
 ```
+A API estará disponível em: http://localhost:8000
 
 2. Acesse o dashboard:
 ```bash
 streamlit run src/dashboard/app.py
 ```
+O dashboard estará disponível em: http://localhost:8501
 
 ## 📁 Estrutura do Projeto
 
 ```
 ├── data/                   # Dados brutos e processados
+│   ├── raw/               # Dados brutos
+│   └── processed/         # Dados processados
 ├── models/                 # Modelos treinados
 ├── notebooks/              # Jupyter notebooks de análise
 ├── src/
